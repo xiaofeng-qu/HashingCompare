@@ -12,6 +12,7 @@ HashingCompare::HashingCompare(){
         hashingTableL[i] = -1;
         hashingTableQ[i] = -1;
         hashingTableD[i] = -1;
+//        hashingTableD2[i] = -1;
     }
     for(int i=0; i < 10; i++){
         linearConflict[i] = 0;
@@ -49,9 +50,9 @@ int HashingCompare::hashingLinear(int key){
 int HashingCompare::hashingQuadratic(int key){
     int index = 0;
     for(int i=0; i<(tableSize-1)/2; i++){
-        // index = (hashf1(key) + i/2 + i * i /2) % tableSize;
+        index = (hashf1(key) + i/2 + i * i /2) % tableSize; // When c1 = 1/2 and c2 = 1/2, it shows less failures
         // index = (hashf1(key) + i + i * i) % tableSize;
-        index = (hashf1(key) + i * i) % tableSize;
+        // index = (hashf1(key) + i * i) % tableSize;
         if(hashingTableQ[index] != -1) continue;
         else{
             for(int j=numOfKeys/1000; j<10; j++){
@@ -66,7 +67,7 @@ int HashingCompare::hashingQuadratic(int key){
 
 int HashingCompare::hashingDouble(int key){
     int index = 0;
-    for(int i=0; i<tableSize; i++){
+    for(int i=0; i<tableSize*10000; i++){ // A significant amount of trials can eliminate the failure in double hashing
         index = (hashf1(key) + i * hashf2(key)) % tableSize;
         if(hashingTableD[index] != -1) continue;
         else{
@@ -79,6 +80,22 @@ int HashingCompare::hashingDouble(int key){
     }
     return -1;
 }
+
+//int HashingCompare::hashingDouble2(int key){
+//    int index = 0;
+//    for(int i=0; i<tableSize; i++){
+//        index = (hashf1(key) + i * hashf2(key)) % tableSize;
+//        if(hashingTableD2[index] != -1) continue;
+//        else{
+//            for(int j=numOfKeys/1000; j<10; j++){
+//                doubleHashingConflict[j] += i;
+//            }
+//            hashingTableD2[index] = key;
+//            return index;
+//        }
+//    }
+//    return -1;
+//}
 
 void HashingCompare::hashL(){
     int indexL = 0;
@@ -116,20 +133,25 @@ void HashingCompare::hashD(){
     numOfKeys = 0;
 }
 
-//void HashingCompare::compare(){
-//    int indexL = 0;
-//    int indexQ = 0;
+//void HashingCompare::hashD2(){
 //    int indexD = 0;
+//    runTimeD = clock();
 //    for(int i=0; i<tableSize-1; i++){
 //        ++numOfKeys;
-//        indexL = hashingLinear(randomNumber[i]);
-//        if(indexL == -1) std::cout<< "Failed to insert " << randomNumber[i] << " using linear probing." << std::endl;
-//        indexQ = hashingQuadratic(randomNumber[i]);
-//        if(indexQ == -1) std::cout<< "Failed to insert " << randomNumber[i] << " using quadratic probing." << std::endl;
-//        indexD = hashingDouble(randomNumber[i]);
-//        if(indexD == -1) std::cout<< "Failed to insert " << randomNumber[i] << " using double hashing." << std::endl;
+//        indexD = hashingDouble2(randomNumber[i]);
+//        if(indexD == -1) std::cout<< "Failed to insert item " << i + 1 << ": " << randomNumber[i] << " using double hashing2." << std::endl;
 //    }
+//    runTimeD = clock() - runTimeD;
+//    numOfKeys = 0;
 //}
+
+void HashingCompare::compare(){
+    hashL();
+    hashQ();
+    hashD();
+//    hashD2();
+    printResult();
+}
 
 void HashingCompare::printResult(){
     std::cout << std::endl;
